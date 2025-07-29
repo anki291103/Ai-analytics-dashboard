@@ -1,7 +1,6 @@
 # AI-Powered Analytics Dashboard
 
 ✨ **Live Demo:** [Click Here to View Live Dashboard](https://ai-analytics-dashboard-iz2u.vercel.app/) ✨
-*(Please replace `YOUR_LIVE_DEMO_URL_HERE` with your actual deployed Vercel/Netlify URL)*
 
 ---
 

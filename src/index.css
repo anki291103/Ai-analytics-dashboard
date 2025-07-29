@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import a Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light mode track */
+  border-radius: 10px;
+}
+
+/* Use your custom colors if defined in tailwind.config.js */
+.dark::-webkit-scrollbar-track {
+  background: theme('colors.primary.900'); /* Use defined dark primary color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888; /* Light mode thumb */
+  border-radius: 10px;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: theme('colors.primary.600'); /* Use defined dark primary color */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Animations for modals/views */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Placeholder animations for views */
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s infinite ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
+/* Full Tailwind-compatible Toggle Switch CSS */
+.toggle {
+  position: relative;
+  display: inline-block; /* Essential for proper layout */
+  vertical-align: middle; /* Align with text */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: theme('colors.gray.300'); /* light mode background */
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+  border-radius: 9999px; /* fully rounded */
+  outline: none; /* remove default outline */
+}
+
+.dark .toggle {
+  background-color: theme('colors.gray.600'); /* dark mode background */
+}
+
+.toggle:checked {
+  background-color: theme('colors.primary.500'); /* checked state background */
+}
+
+/* The thumb of the toggle switch */
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; /* Adjust for padding/centering */
+  left: 2px; /* Adjust for padding/centering */
+  width: 20px; /* Thumb size for h-6 w-12 track */
+  height: 20px; /* Thumb size */
+  background-color: white; /* Thumb color */
+  border-radius: 9999px; /* fully rounded */
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* subtle shadow for thumb */
+}
+
+.toggle:checked::after {
+  transform: translateX(24px); /* (width of track - width of thumb - 2*padding/gap) = 48 - 20 - 4 = 24 */
+}
+
+/* Hide original checkbox visually but keep accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

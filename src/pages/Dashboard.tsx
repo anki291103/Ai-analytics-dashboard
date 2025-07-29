@@ -19,7 +19,7 @@ import { ITEMS_PER_PAGE } from '../utils/constants';
 import { FaUsers, FaShoppingCart, FaChartLine, FaPlay, FaPause } from 'react-icons/fa'; // Added Play/Pause icons
 import { salesData as initialSalesData, type SalesDataItem } from '../data/dashboardData'; // Renamed initial import
 import { predictSalesTrend, detectSalesAnomalies } from '../utils/aiUtils';
-import { parseNaturalLanguageQuery, type ParsedQuery } from '../utils/nlpUtils';
+import { parseNaturalLanguageQuery } from '../utils/nlpUtils';
 import { generateNewSalesDataItem } from '../utils/dataGenerators'; // NEW: Import data generator
 
 // Helper Functions (filterDataByDateRange, filterDataByCategory, generateInsightsAndRecommendations remain unchanged)

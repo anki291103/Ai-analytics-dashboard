@@ -4,12 +4,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import { type SalesDataItem } from '../data/dashboardData';
 
 interface CategoryPieChartProps {
-  data: SalesDataItem[];
+  data: SalesDataItem[]; // Filtered sales data
 }
 
-// Use colors that align with your theme, maybe from tailwind.config.js's accent colors
-// Or define a set of distinct, appealing colors
-const COLORS = ['#6366f1', '#22c55e', '#a855f7', '#ef4444', '#f97316', '#eab308']; // Example: Primary-500, Green, Purple, Red, Orange, Yellow
+const COLORS = ['#6366f1', '#22c55e', '#a855f7', '#ef4444', '#f97316', '#eab308'];
 
 const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data }) => {
   const aggregatedData = useMemo(() => {
@@ -43,7 +41,7 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data }) => {
           cy="50%"
           labelLine={false}
           outerRadius={100}
-          fill="#8884d8" // This fill will be overridden by Cell fills
+          fill="#8884d8"
           dataKey="value"
           label={({ name, percent }) => {
             if (typeof percent === 'number') {
@@ -53,7 +51,7 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data }) => {
           }}
           isAnimationActive={true}
         >
-          {aggregatedData.map((entry, index) => (
+          {aggregatedData.map((_, index) => ( // Changed 'entry' to '_'
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>

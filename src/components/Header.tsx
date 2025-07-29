@@ -1,12 +1,12 @@
 // src/components/Header.tsx
-import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle, FaSearch, FaMoon, FaSun, FaLightbulb, FaBars } from 'react-icons/fa'; // Added FaBars
+import React, { useState } from 'react'; // Removed useEffect
+import { FaBell, FaUserCircle, FaSearch, FaMoon, FaSun, FaLightbulb, FaBars } from 'react-icons/fa';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
   onToggleDarkMode: () => void;
   isDarkMode: boolean;
-  onToggleSidebar: () => void; // NEW: Prop for mobile sidebar toggle
+  onToggleSidebar: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onSearch, onToggleDarkMode, isDarkMode, onToggleSidebar }) => {
@@ -28,7 +28,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onToggleDarkMode, isDarkMode,
 
   return (
     <header className="bg-white dark:bg-gray-800 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 shadow-sm p-4 flex items-center justify-between border-b dark:border-gray-700">
-      {/* Mobile Hamburger Icon */}
       <button
         onClick={onToggleSidebar}
         className="md:hidden text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ml-2"
@@ -37,7 +36,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onToggleDarkMode, isDarkMode,
         <FaBars className="text-xl" />
       </button>
 
-      {/* AI Search Bar */}
       <div className="relative flex-1 max-w-lg mx-4">
         <input
           type="text"
@@ -59,7 +57,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onToggleDarkMode, isDarkMode,
         </button>
       </div>
 
-      {/* User Actions */}
       <div className="flex items-center space-x-4 mr-4">
         <button
           onClick={onToggleDarkMode}

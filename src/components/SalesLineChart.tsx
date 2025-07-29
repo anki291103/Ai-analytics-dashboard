@@ -19,48 +19,56 @@ interface PredictionDataPoint {
   date: string;
   sales: number | null;
   isPrediction: boolean;
-  isAnomaly?: boolean; // This is added because the combined data might have it
+  isAnomaly?: boolean;
 }
 
 // Extend DotProps to include payload which contains our data point.
-// This is crucial for TypeScript to understand what 'payload' is.
 // We also add a custom click handler specific to our data type.
 interface CustomDotProps extends DotProps {
   payload?: PredictionDataPoint; // Make payload optional as per Recharts behavior, but define its type
-  onDotClick?: (data: PredictionDataPoint) => void; // A new prop for our custom click handler
+  onDotClick?: (data: PredictionDataPoint) => void; // Our custom click handler
 }
 
 // Custom dot component to highlight anomalies and handle clicks
 const CustomDot: React.FC<CustomDotProps> = (props) => {
-  const { cx, cy, stroke, payload, onDotClick } = props;
+  // Explicitly destructure ONLY the props you need for rendering the dot and handling the click.
+  // Any other props that Recharts passes (like internal event handlers, or data props)
+  // are deliberately NOT destructured or spread onto the native SVG element.
+  const {
+    cx, cy, stroke, fill, r, // Standard circle/dot rendering props
+    payload, // Our custom data payload
+    onDotClick, // Our custom click handler
+    key, // React's key prop (needed for custom components in lists)
+  } = props;
 
-  // Handle cases where cx or cy might be undefined (e.g., if dot is not rendered)
-  // or if payload is unexpectedly missing.
+
   if (cx === undefined || cy === undefined || !payload) {
     return null;
   }
 
-  // Handle click on the dot
-  const handleClick = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent any parent click handlers from firing (e.g., if LineChart had one)
+  // Define our specific click handler for the DOM element
+  const handleClick = (event: React.MouseEvent<SVGCircleElement | SVGSVGElement>) => {
+    event.stopPropagation(); // Prevent any parent click handlers from firing
     if (onDotClick) {
-      onDotClick(payload); // Pass only the payload (our data point)
+      onDotClick(payload); // Call our custom handler with the data
     }
   };
 
   if (payload.isAnomaly) {
     return (
       <svg
+        key={key} // Pass the key directly here
         x={cx - 8}
         y={cy - 8}
         width={16}
         height={16}
         fill="red"
         viewBox="0 0 1024 1024"
-        onClick={handleClick} // Attach click handler here
+        onClick={handleClick} // Use our dedicated handleClick
         style={{ cursor: 'pointer' }} // Indicate clickable
+        // Do NOT spread any other props here from Recharts' DotProps,
+        // as they might contain incompatible event handler types.
       >
-        {/* Using a simple warning/exclamation icon path */}
         <path d="M512 0c-282.77 0-512 229.23-512 512s229.23 512 512 512 512-229.23 512-512-229.23-512-512-512zm0 896c-212.04 0-384-171.96-384-384s171.96-384 384-384 384 171.96 384 384-171.96 384-384 384zM470.4 256h81.2v384h-81.2v-384zM470.4 704h81.2v81.2h-81.2v-81.2z" fill="#ff0000" />
       </svg>
     );
@@ -68,31 +76,31 @@ const CustomDot: React.FC<CustomDotProps> = (props) => {
   // Otherwise, render a standard circle dot
   return (
     <circle
+      key={key} // Pass the key directly here
       cx={cx}
       cy={cy}
-      r={4}
-      fill={stroke}
-      onClick={handleClick} // Attach click handler here
+      r={r || 4} // Provide a default radius if 'r' is undefined
+      fill={fill || stroke || "#8884d8"} // Provide fallback fill
+      onClick={handleClick} // Use our dedicated handleClick
       style={{ cursor: 'pointer' }} // Indicate clickable
+      // Do NOT spread any other props here from Recharts' DotProps.
     />
   );
 };
 
 
 interface SalesLineChartProps {
-  data: SalesDataItem[]; // Actual historical data (can include isAnomaly)
-  predictionData: PredictionDataPoint[]; // Combined historical + prediction data
-  onDataPointClick: (data: PredictionDataPoint) => void; // Callback for data point clicks
+  data: SalesDataItem[];
+  predictionData: PredictionDataPoint[];
+  onDataPointClick: (data: PredictionDataPoint) => void;
 }
 
-const SalesLineChart: React.FC<SalesLineChartProps> = ({ data, predictionData, onDataPointClick }) => {
+const SalesLineChart: React.FC<SalesLineChartProps> = ({ data: _data, predictionData, onDataPointClick }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
         data={predictionData}
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        // The LineChart itself doesn't need an onClick here, as dots handle it.
-        // If you wanted a click on the chart background to do something, you'd add it here.
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
         <XAxis
@@ -104,37 +112,52 @@ const SalesLineChart: React.FC<SalesLineChartProps> = ({ data, predictionData, o
         <YAxis axisLine={false} tickLine={false} />
         <Tooltip
           cursor={{ strokeDasharray: '3 3' }}
-          formatter={(value, name, props) => [`₹${(value as number).toLocaleString()}`, name === 'sales' ? 'Sales' : 'Predicted Sales']}
+          formatter={(value, name) => [`₹${(value as number).toLocaleString()}`, name === 'sales' ? 'Sales' : 'Predicted Sales']}
           labelFormatter={(label) => `Date: ${new Date(label).toLocaleDateString()}`}
         />
         <Legend />
-        {/* Actual Sales Line - use 'predictionData' here, filtered to only show actual points.
-            Pass the onDataPointClick handler to the CustomDot component. */}
         <Line
           type="monotone"
           dataKey="sales"
-          stroke="#4f46e5" // Blue
+          stroke="#4f46e5"
           strokeWidth={3}
-          // The 'dot' prop expects either a boolean or a React element/function.
-          // When passing a component, Recharts will inject the necessary DotProps.
-          // We provide our CustomDot component, passing our specific handler to it.
-          dot={(props) => <CustomDot {...props} onDotClick={onDataPointClick} />}
+          // The 'dot' prop render function receives Recharts' DotProps.
+          // We'll pass specific props to CustomDot and explicitly handle the 'key'.
+          dot={(dotPropsFromRecharts) => {
+            const { key, ...rechartsSpecificDotProps } = dotPropsFromRecharts;
+            // Pass only the relevant Recharts dot props and our custom handler.
+            // Avoid passing all of 'rechartsSpecificDotProps' as some internal props might conflict.
+            return (
+              <CustomDot
+                key={key} // Key passed directly
+                cx={rechartsSpecificDotProps.cx}
+                cy={rechartsSpecificDotProps.cy}
+                r={rechartsSpecificDotProps.r}
+                fill={rechartsSpecificDotProps.fill}
+                stroke={rechartsSpecificDotProps.stroke}
+                strokeWidth={rechartsSpecificDotProps.strokeWidth}
+                payload={rechartsSpecificDotProps.payload}
+                onDotClick={onDataPointClick} // Our custom handler
+                // Do NOT spread 'rechartsSpecificDotProps' here.
+                // If you need other standard HTML/SVG attributes (like 'className'),
+                // you would need to explicitly pull them out of 'dotPropsFromRecharts'
+                // and pass them. For example: `className={dotPropsFromRecharts.className}`
+              />
+            );
+          }}
           activeDot={{ r: 8 }}
           name="Actual Sales"
-          isAnimationActive={false} // Disable animation for actual data if prediction is animated
-          // Filter to only display actual data points on this line
+          isAnimationActive={false}
           data={predictionData.filter(d => !d.isPrediction)}
         />
-        {/* Predicted Sales Line */}
         <Line
           type="monotone"
           dataKey="sales"
-          stroke="#ef4444" // Red for prediction
+          stroke="#ef4444"
           strokeWidth={2}
-          strokeDasharray="5 5" // Dotted line for prediction
-          dot={false} // No dots for prediction line on this line
+          strokeDasharray="5 5"
+          dot={false}
           name="Predicted Sales"
-          // Filter to only display prediction data points on this line
           data={predictionData.filter(d => d.isPrediction)}
         />
       </LineChart>
